@@ -3,8 +3,6 @@ import { handle } from 'hono/aws-lambda';
 import { cors } from 'hono/cors';
 import { registerAuthRoutes } from './routes/login';
 import { registerAnalyzeRoute } from './routes/analyze';
-import { registerDescribeTablesRoute } from './routes/describe-tables';
-import { registerMigrationRoute } from './routes/migration';
 
 const app = new Hono();
 
@@ -19,8 +17,6 @@ app.use(
 
 registerAuthRoutes(app);
 registerAnalyzeRoute(app);
-registerDescribeTablesRoute(app);
-registerMigrationRoute(app);
 
 app.get('/', c => c.text('OK'));
 
