@@ -60,6 +60,44 @@
 
 But for a Websocket setup, this would used to provide real-time updates to the client on what is the progress of the analysis, better responsive feedback on the analysis without refreshing the page, and create push notifications to the user to inform them that the analysis is done.
 
+## Prompt Design
+- As structured output is required, Zod was used to ensure that the output from the OpenAI API response conformed to a standard structure. This also helps the API know what kind of response we expect from it.
+
+```
+article_summary: z
+    .array(z.string())
+    .describe('Summaries of the article; multiple languages allowed'),
+  nationalities: z.array(z.string()).describe('Nationalities or countries'),
+  organizations: z.array(z.string()).describe('Organizations'),
+  people: z.array(z.string()).describe('People'),
+  language: z
+    .array(z.string())
+    .optional()
+    .describe('Languages detected'),
+});
+```
+
+- System Prompt is basic, as the main functionality is in the user prompt.
+```
+You are an expert information-extraction engine from text.
+```
+
+- The user prompt is structured with what is needed for how the document text should be processed, and take note of any caveats.
+
+```
+# INSTRUCTIONS
+Return ONLY valid JSON that conforms exactly to the provided Zod schema - no markdown, comments, or extra keys.
+Extraction rules:
+1. article_summary - concise, neutral and factual. If the article is in multiple languages, create summaries for each language.
+2. nationalities - deduplicated demonyms or country names in the article text. This can be in any language.
+3. organizations - formal names of groups, agencies, NGOs, companies, alliances, etc. This can be in any language.
+4. people - full personal names (skip titles alone).
+5. language - the languages of the article, e.g. "English", "Spanish", "French".
+
+If a list would otherwise be empty, return an empty array for that key.
+
+### ARTICLE\n${articleText}\n\n### TASK\nDetect the language of the article first. Then summarize the article and extract the required entities.\nReturn the JSON object only`
+```
 
 ## Setup Instructions
 
